@@ -1,0 +1,33 @@
+# 这里是工作流名称
+name: Swift
+
+# 这里是触发条件
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+# 这里是环境变量
+env: 
+  POSTGRES_HOSTNAME: postgres
+# 这里是任务
+jobs:
+# 构建任务
+  bionic:
+    container: 
+      image: vapor/swift:5.2-bionic
+    # 这里是运行环境
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: vapor
+          POSTGRES_DB: vapor
+          POSTGRES_PASSWORD: password
+    # 这里是步骤
+    steps:
+    - uses: actions/checkout@v1
+      working-directory: ./soulmangaAdmin
+    - name: Run
+      run: swift test --enable-test-discovery --sanitize=thread
