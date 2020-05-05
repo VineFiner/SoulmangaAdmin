@@ -1,13 +1,25 @@
 import Fluent
 import FluentPostgresDriver
 import FluentSQLiteDriver
+import Leaf
 import QueueMemoryDriver
 import Vapor
 
 // configures your application
 public func configure(_ app: Application) throws {
     // uncomment to serve files from /Public folder
-    // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+    app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+    // Session
+    app.middleware.use(app.sessions.middleware)
+    app.sessions.use(.fluent)
+    /*
+     Xcode Edit Scheme -> Run -> Options -> Working Directory -> `$(SRCROOT)`
+     */
+    app.views.use(.leaf)
+    if !app.environment.isRelease {
+        // 这里禁用缓存
+        app.leaf.cache.isEnabled = false
+    }
     
     app.databases.use(.postgres(
         hostname: Environment.get("DATABASE_HOST") ?? "localhost",
@@ -16,6 +28,9 @@ public func configure(_ app: Application) throws {
         database: Environment.get("DATABASE_NAME") ?? "vapor_database"
         ), as: .psql)
     app.databases.use(.sqlite(.file("db.sqlite")), as: .sqlite)
+    
+    // MARK: Session
+    app.migrations.add(SessionRecord.migration)
     
     // MARK: App Config
     app.config = .environment

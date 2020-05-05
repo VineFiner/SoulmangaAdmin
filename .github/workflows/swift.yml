@@ -28,6 +28,6 @@ jobs:
     # 这里是步骤
     steps:
     - uses: actions/checkout@v1
-      working-directory: ./soulmangaAdmin
+      working-directory: ./soulmangaadmin
     - name: Run
       run: swift test --enable-test-discovery --sanitize=thread

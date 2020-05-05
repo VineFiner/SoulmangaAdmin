@@ -2,9 +2,6 @@ import Fluent
 import Vapor
 
 func routes(_ app: Application) throws {
-    app.get { req in
-        return "It works!"
-    }
 
     app.get("hello") { req -> String in
         return "Hello, world!"
@@ -19,4 +16,6 @@ func routes(_ app: Application) throws {
     app.delete("todos", ":todoID", use: todoController.delete)
     
     try app.register(collection: AuthenticationController())
+    try app.register(collection: WebsiteController())
+
 }

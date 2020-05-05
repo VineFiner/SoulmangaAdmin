@@ -24,9 +24,9 @@ extension RoutesBuilder {
 extension RoutesBuilder {
     
     fileprivate func middleware(_ type: FrontendMiddlewareType) -> [Middleware] {
-        let middleware: [Middleware] = []
+        var middleware: [Middleware] = []
         if type == .all {
-//            middleware.append(User.sessionAuthenticator())
+            middleware.append(User.sessionAuthenticator())
         }
         return middleware
     }

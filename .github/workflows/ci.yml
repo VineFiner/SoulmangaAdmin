@@ -19,7 +19,7 @@ jobs:
       uses: actions/checkout@v2
     # 这里是构建镜像
     - name: Build the Docker image
-      working-directory: ./soulmangaAdmin
+      working-directory: ./soulmangaadmin
       run: |
         docker build . --file Dockerfile --tag soulmangaadmin:latest
         mkdir docker
@@ -33,7 +33,7 @@ jobs:
         PORT: ${{ secrets.PORT }}
         KEY: ${{ secrets.ACCESS_TOKEN }}
       with:
-        source: "soulmangaAdmin"
+        source: "soulmangaadmin"
         target: "Code"
     
   # 部署任务
@@ -50,5 +50,5 @@ jobs:
         key: ${{ secrets.ACCESS_TOKEN }}
         port: ${{ secrets.PORT }}
         script: |
-          cd Code/soulmangaAdmin
+          cd Code/soulmangaadmin
           ls
