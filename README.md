@@ -35,3 +35,23 @@ docker run --rm --name vapor-server \
     -it \
     vapor/swift:5.2
 ```
+
+## env
+
+- Email 测试
+
+```
+https://mailtrap.io/
+```
+
+- development
+
+```
+cp .env .env.development
+```
+
+- production
+
+```
+cp .env .env.production
+```

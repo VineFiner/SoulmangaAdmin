@@ -3,6 +3,7 @@ import FluentPostgresDriver
 import FluentSQLiteDriver
 import Leaf
 import QueueMemoryDriver
+import SwiftSMTPVapor
 import Vapor
 
 // configures your application
@@ -31,9 +32,16 @@ public func configure(_ app: Application) throws {
     
     // MARK: Session
     app.migrations.add(SessionRecord.migration)
-    
+
     // MARK: App Config
     app.config = .environment
+    
+    // MARK: Email, 在 app config 之后
+    let emailConfig = SwiftSMTPVapor.Configuration.init(server:
+        .init(hostname: app.config.noReplayEmailHostName, port: 465), credentials:
+        .init(username: app.config.noReplayEmailUserName,
+              password: app.config.noReplayEmailPassword))
+    app.swiftSMTP.initialize(with: emailConfig)
     
     // register routes
     try routes(app)

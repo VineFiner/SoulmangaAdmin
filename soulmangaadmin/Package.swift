@@ -15,7 +15,8 @@ let package = Package(
         .package(url: "https://github.com/vapor/leaf.git", from: "4.0.0-rc"),
 
         // develop
-        .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0-rc")
+        .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0-rc"),
+        .package(url: "https://github.com/sersoft-gmbh/SwiftSMTP.git", from: "2.0.0-rc")
     ],
     targets: [
         .target(name: "QueueMemoryDriver",dependencies: [
@@ -32,6 +33,7 @@ let package = Package(
             
             // develop
             .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
+            .product(name: "SwiftSMTPVapor", package: "SwiftSMTP"),
             "QueueMemoryDriver"
         ]),
         .target(name: "Run", dependencies: ["App"]),
