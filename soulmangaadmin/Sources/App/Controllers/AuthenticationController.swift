@@ -23,12 +23,13 @@ struct AuthenticationController: RouteCollection {
                 /// 发送带有令牌的重置密码电子邮件
                 resetPasswordRoutes.post("", use: resetPassword)
                 
-                /// 验证给定的重置密码令牌
+                /// 验证给定的重置密码令牌, 基本无用
                 resetPasswordRoutes.get("verify", use: verifyResetPasswordToken)
             }
             
-            /// 使用提供的重置密码令牌更改用户密码
+            /// 前端页面，找回密码
             auth.post("recover", use: recoverAccount)
+            
             /// 为用户提供新的访问令牌和刷新令牌
             auth.post("accessToken", use: refreshAccessToken)
             
@@ -211,7 +212,9 @@ struct AuthenticationController: RouteCollection {
                 }
         }
     }
-    
+    /* 认证密码 Token
+        curl -i -X GET "http://localhost:8080/api/auth/reset-password/verify?token=e704f18ab72bd3576c1dc97afe7fc37d9031b6419afb6cbe8a378a92030dcfa5"
+     */
     private func verifyResetPasswordToken(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         let token = try req.query.get(String.self, at: "token")
         
@@ -232,10 +235,10 @@ struct AuthenticationController: RouteCollection {
                 return req.eventLoop.makeSucceededFuture(.noContent)
         }
     }
-    /*
-     curl -i -X POST "http://127.0.0.1:8080/api/auth/login" \
+    /* 验证并重设密码
+     curl -i -X POST "http://127.0.0.1:8080/api/auth/recover/" \
      -H "Content-Type: application/json" \
-     -d '{"email": "test@vapor.codes", "password": "secret11"}'
+     -d '{"password": "thisispassword", "confirmPassword": "thisispassword", "token": ""}'
      */
     private func recoverAccount(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
         try RecoverAccountRequest.validate(req)

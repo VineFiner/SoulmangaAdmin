@@ -32,9 +32,11 @@ struct DatabasePasswordTokenRepository: PasswordTokenRepository, DatabaseReposit
     func create(_ passwordToken: PasswordToken) -> EventLoopFuture<Void> {
         passwordToken.create(on: database)
     }
-    
+    /// 删除当前用户的所有 PasswordToken
     func delete(_ passwordToken: PasswordToken) -> EventLoopFuture<Void> {
-        passwordToken.delete(on: database)
+        return PasswordToken.query(on: database)
+            .join(User.self, on: \PasswordToken.$user.$id == \User.$id)
+            .delete()
     }
     
     func delete(for userID: UUID) -> EventLoopFuture<Void> {

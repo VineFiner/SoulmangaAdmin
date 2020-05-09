@@ -20,9 +20,11 @@ struct DatabaseEmailTokenRepository: EmailTokenRepository, DatabaseRepository {
     func create(_ emailToken: EmailToken) -> EventLoopFuture<Void> {
         return emailToken.create(on: database)
     }
-    
+    /// 删除当前用户的所有 EmailToken
     func delete(_ emailToken: EmailToken) -> EventLoopFuture<Void> {
-        return emailToken.delete(on: database)
+        return EmailToken.query(on: database)
+            .join(User.self, on: \EmailToken.$user.$id == \User.$id)
+            .delete()
     }
     
     func find(userID: UUID) -> EventLoopFuture<EmailToken?> {
