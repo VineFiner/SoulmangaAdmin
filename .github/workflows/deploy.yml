@@ -1,0 +1,66 @@
+# 这里是工作流名称
+name: Deplay Server CI
+
+# 这里是触发条件
+on:
+  push:
+    branches: [ deploy ]
+
+# 这里是任务
+jobs:
+  # 任务名称, 构建任务
+  build:
+    # 运行环境
+    runs-on: ubuntu-latest
+    # 这里是容器
+    container: 
+        image: vapor/swift:5.2-xenial
+    # 这里是运行步骤
+    steps:
+    # 这里是动作
+    - name: Checkout action
+      uses: actions/checkout@v2
+    # 安装依赖
+    - name: Install sqlite3
+      run: apt-get update -y && apt-get install -y libsqlite3-dev
+    # 这里是构建镜像
+    - name: Build Swift project
+      working-directory: ./soulmangaadmin
+      run: |
+        pwd
+        ls
+        swift build --enable-test-discovery -c release -Xswiftc -g
+        mkdir run
+        cp -r .build/release ./run
+        cp -r ./Public ./run/Public
+        cp -r ./Resources ./run/Resources
+
+    # 传输到服务器
+    - name: copy file via ssh key
+      uses: appleboy/scp-action@master
+      env:
+        HOST: ${{ secrets.REMOTE_HOST }}
+        USERNAME: ${{ secrets.USERNAME }}
+        port: ${{ secrets.PORT }}
+        KEY: ${{ secrets.ACCESS_TOKEN }}
+      with:
+        source: "soulmangaadmin"
+        target: "Code"
+    
+  # 部署任务
+  display:
+    name: Display wait build finished
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.ACCESS_TOKEN }}
+        port: 22
+        script: |
+          ls
+          cd Code/soulmangaadmin
+          ls

@@ -17,6 +17,10 @@ func migrations(_ app: Application) throws {
     app.migrations.add(CreatePasswordToken())
     // admin
     app.migrations.add(CreateAdminUser())
-    // todo
-    app.migrations.add(CreateTodo())
+    
+    try cosmos(app)
+}
+
+func cosmos(_ app: Application) throws {
+    app.migrations.add(CreateGalaxy())
 }
