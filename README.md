@@ -36,6 +36,10 @@ docker run --rm --name vapor-server \
     vapor/swift:5.2
 ```
 
+```
+ docker run --name vapor-hello -v $PWD:/code -w /code -p 8080:8080 -it swift:5.2-bionic bash
+```
+
 ## env
 
 - Email 测试
