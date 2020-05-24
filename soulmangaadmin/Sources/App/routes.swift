@@ -11,6 +11,12 @@ func routes(_ app: Application) throws {
     try app.register(collection: WebsiteController())
     
     try cosomosRoutes(app)
+    try booksRoutes(app)
+}
+/// books
+func booksRoutes(_ app: Application) throws {
+    try app.register(collection: BookController())
+    try app.register(collection: CrawClientController())
 }
 /// cosomos
 func cosomosRoutes(_ app: Application) throws {

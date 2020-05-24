@@ -18,9 +18,15 @@ func migrations(_ app: Application) throws {
     // admin
     app.migrations.add(CreateAdminUser())
     
+    try books(app)
     try cosmos(app)
 }
-
+/// books
+func books(_ app: Application) throws {
+    app.migrations.add(BookChapter())
+    app.migrations.add(BookInfo())
+}
+/// cosmos
 func cosmos(_ app: Application) throws {
     app.migrations.add(CreateGalaxy())
     app.migrations.add(CreateStar())
