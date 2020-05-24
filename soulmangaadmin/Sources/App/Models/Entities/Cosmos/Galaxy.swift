@@ -8,7 +8,7 @@
 import Fluent
 import Vapor
 
-final class Galaxy: Model {
+final class Galaxy: Model, Content {
     // Name of the table or collection.
     static let schema = "galaxies"
 
@@ -20,6 +20,10 @@ final class Galaxy: Model {
     @Field(key: "name")
     var name: String
 
+    // All the Stars in this Galaxy.
+    @Children(for: \.$galaxy)
+    var stars: [Star]
+    
     // Creates a new, empty Galaxy.
     init() { }
 

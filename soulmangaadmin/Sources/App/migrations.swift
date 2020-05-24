@@ -23,4 +23,7 @@ func migrations(_ app: Application) throws {
 
 func cosmos(_ app: Application) throws {
     app.migrations.add(CreateGalaxy())
+    app.migrations.add(CreateStar())
+    app.migrations.add(CreateTag())
+    app.migrations.add(CreateStarTag())
 }
