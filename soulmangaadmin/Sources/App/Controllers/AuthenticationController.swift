@@ -117,7 +117,7 @@ struct AuthenticationController: RouteCollection {
                 let saveAccess = accessToken.create(on: req.db)
                 
                 return saveRefresh.and(saveAccess).flatMapThrowing { (void) -> LoginResponse in
-                    return LoginResponse(user: UserDTO(from: user),accessToken: accessToken.value,refreshToken: refreshValue)
+                    return LoginResponse(user: UserDTO(from: user),accessToken: accessToken.value, expiresIn: accessToken.expiresAt.timeIntervalSince1970,refreshToken: refreshValue)
                 }
             } catch {
                 return req.eventLoop.makeFailedFuture(error)
@@ -145,7 +145,7 @@ struct AuthenticationController: RouteCollection {
             .guard({ $0.expiresAt > Date() }, else: AuthenticationError.refreshTokenHasExpired)
             .flatMap { req.users.find(id: $0.$user.id) }
             .unwrap(or: AuthenticationError.refreshTokenOrUserNotFound)
-            .flatMap { user in
+            .flatMap { user -> EventLoopFuture<(String, UserToken)> in
                 do {
                     // 这里是刷新Token
                     let tokenValue = [UInt8].random(count: 16).base64
@@ -157,12 +157,12 @@ struct AuthenticationController: RouteCollection {
                     //保存
                     let saveRefresh = refreshToken.create(on: req.db)
                     let saveAccess = accessToken.create(on: req.db)
-                    return saveRefresh.and(saveAccess).transform(to: (tokenValue, accessToken.value))
+                    return saveRefresh.and(saveAccess).transform(to: (tokenValue, accessToken))
                 } catch {
                     return req.eventLoop.makeFailedFuture(error)
                 }
         }
-        .map { AccessTokenResponse(refreshToken: $0, accessToken: $1) }
+        .map { AccessTokenResponse(refreshToken: $0, expiresIn: $1.expiresAt.timeIntervalSince1970, accessToken: $1.value) }
     }
     /*
      curl -H "Authorization: Bearer PPMla5rf9aTlnK1Uu8zwIQ==" \
