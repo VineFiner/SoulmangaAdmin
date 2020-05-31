@@ -13,4 +13,6 @@ func queues(_ app: Application) throws {
     try app.queues.use(.memory())
     // MARK: Jobs
     app.queues.add(EmailJob())
+    // MARK: Craw
+    app.queues.add(CrawBookJob())
 }

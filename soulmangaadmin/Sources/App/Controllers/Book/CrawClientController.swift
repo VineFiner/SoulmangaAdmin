@@ -79,7 +79,7 @@ struct CrawClientController: RouteCollection {
         return result
     }
     /// 创建章节内容 http://127.0.0.1:8080/api/craw/chapter/AE2EEB65-1FBD-4ECD-A936-840E81B34BA5
-    func crawCreateChapterInfo(req: Request) throws -> EventLoopFuture<[BookChapter]> {
+    func crawCreateChapterInfo(req: Request) throws -> EventLoopFuture<HTTPStatus> {
         guard let bookID = req.parameters.get("bookId", as: UUID.self) else {
             throw Abort(.notFound, reason: "No poetry matched the provided id")
         }
@@ -88,45 +88,11 @@ struct CrawClientController: RouteCollection {
         let result = BookChapter.query(on: req.db)
             .filter(\.$bookInfo.$id == bookID)
             .filter(\.$isScraw == false)
-            .range(0..<300)
             .all()
         // 进行下载
-        return result.flatMapEach(on: req.eventLoop) { (chapter) -> EventLoopFuture<BookChapter> in
-            self.downLoadChapter(req: req, chapter: chapter)
-        }
-        .flatMap({ (chapters) -> EventLoopFuture<[BookChapter]> in
-            // 如果还有章节，循环下载
-            if chapters.count > 0 {
-                if let downloadResult = try? self.crawCreateChapterInfo(req: req) {
-                    return downloadResult
-                } else {
-                    return req.eventLoop.future(chapters)
-                }
-            } else {
-                return req.eventLoop.future(chapters)
-            }
-            
-        })
-    }
-    // 下载，并保存章节
-    func downLoadChapter(req: Request,chapter: BookChapter) -> EventLoopFuture<BookChapter> {
-        let linkUrl = chapter.linkUrl
-        let chapterUrl: URI = URI(string: linkUrl)
-        return req.client.get(chapterUrl)
-            .flatMapThrowing { (res) -> BookChapterContext in
-                let resultData = res.body.flatMap { (buffer) -> Data? in
-                    return buffer.getData(at: 0, length: buffer.readableBytes)
-                }
-                let gbk = String.Encoding(rawValue: 2147485234)
-                guard let info = resultData, let infoStr = String(data: info, encoding: gbk) else {
-                    throw Abort(.badRequest, reason: "paser fail")
-                }
-                return try CrawClientController.paserChapter(htmlContent: infoStr)
-        }.flatMap { (chapterContext) -> EventLoopFuture<BookChapter> in
-            chapter.content = chapterContext.content
-            chapter.isScraw = true
-            return chapter.save(on: req.db).transform(to: chapter)
-        }
+        return result.flatMapEach(on: req.eventLoop) { (chapter) -> EventLoopFuture<Void> in
+            return req.queue.dispatch(CrawBookJob.self, chapter)
+        }.transform(to: HTTPStatus.ok)
     }
 }
 /// 书籍信息
@@ -166,30 +132,6 @@ extension CrawClientController {
         }
         let newBookInfo = BookInfoContext(bookName: bookName, authorName: authorName, chapters: chapters)
         return newBookInfo
-    }
-}
-/// 章节信息
-extension CrawClientController {
-    
-    struct BookChapterContext: Content {
-        let content: String
-        let name: String
-    }
-    /// 章节信息解析
-    static func paserChapter(htmlContent: String) throws -> BookChapterContext {
-        
-        var chapterContent: String = ""
-        var chapterName: String = ""
-        
-        guard let document = try? SwiftSoup.parse(htmlContent) else { throw Abort(.badRequest, reason: "paser fail") }
-        guard let box_con = try? document.select("div[id='box_con']") else { throw Abort(.badRequest, reason: "paser fail") }
-        if let content = try? box_con.select("div[id='content']").text() {
-            chapterContent = content
-        }
-        if let bookName = try? box_con.select("div[class='bookname']").select("h1").text() {
-            chapterName = bookName
-        }
-        return BookChapterContext(content: chapterContent, name: chapterName)
     }
 }
 
