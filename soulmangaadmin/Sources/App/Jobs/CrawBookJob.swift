@@ -19,7 +19,15 @@ struct CrawBookJob: Job {
     typealias Payload = BookChapter
     
     func dequeue(_ context: QueueContext, _ payload: BookChapter) -> EventLoopFuture<Void> {
-        return self.downLoadChapter(context, chapter: payload).transform(to: ())
+        do {
+            return try BookChapter.find(payload.requireID(), on: context.application.db)
+                .unwrap(or: Abort(.notFound))
+                .flatMap { (chapter) -> EventLoopFuture<Void> in
+                    self.downLoadChapter(context, chapter: chapter).transform(to: ())
+            }
+        } catch {
+            return context.eventLoop.makeFailedFuture(error)
+        }
     }
     
     func error(_ context: QueueContext, _ error: Error, _ payload: BookChapter) -> EventLoopFuture<Void> {

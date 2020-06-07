@@ -15,4 +15,9 @@ func queues(_ app: Application) throws {
     app.queues.add(EmailJob())
     // MARK: Craw
     app.queues.add(CrawBookJob())
+    
+    // MARK: scheduled
+    app.queues.schedule(ScheduledCrawBookJob())
+        .minutely()
+        .at(1)
 }

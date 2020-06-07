@@ -11,9 +11,11 @@ import Vapor
 final class BookInfo:Model, Content {
     static let schema = "bookinfo"
     
-    @ID(key: .id)
-    var id: UUID?
-        
+//    @ID(key: .id)
+//    var id: UUID?
+    @ID(custom: "book_id")
+    var id: Int?
+    
     @Field(key: "book_name")
     var bookName: String
     
@@ -29,7 +31,7 @@ final class BookInfo:Model, Content {
     init() { }
 
     // Creates a new BookInfo with all properties set.
-    init(id: UUID? = nil, name: String, authorName: String) {
+    init(id: Int? = nil, name: String, authorName: String) {
         self.id = id
         self.bookName = name
         self.authorName = authorName
@@ -39,7 +41,7 @@ extension BookInfo: Migration {
     // Prepares the database for storing BookInfo models.
      func prepare(on database: Database) -> EventLoopFuture<Void> {
          database.schema("bookinfo")
-             .id()
+             .field("book_id", .int, .identifier(auto: true))
              .field("book_name", .string)
              .field("author_name", .string)
              .create()

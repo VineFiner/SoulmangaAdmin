@@ -80,7 +80,7 @@ struct CrawClientController: RouteCollection {
     }
     /// 创建章节内容 http://127.0.0.1:8080/api/craw/chapter/AE2EEB65-1FBD-4ECD-A936-840E81B34BA5
     func crawCreateChapterInfo(req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        guard let bookID = req.parameters.get("bookId", as: UUID.self) else {
+        guard let bookID = req.parameters.get("bookId", as: Int.self) else {
             throw Abort(.notFound, reason: "No poetry matched the provided id")
         }
         print("id:\(bookID)")

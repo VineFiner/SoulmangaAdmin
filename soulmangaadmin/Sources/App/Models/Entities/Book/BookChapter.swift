@@ -34,7 +34,7 @@ final class BookChapter: Model, Content {
     init() { }
     
     // Creates a new chapter with all properties set.
-    init(id: UUID? = nil, title: String, linkUrl: String, isScraw: Bool,content: String, bookInfoID: UUID) {
+    init(id: UUID? = nil, title: String, linkUrl: String, isScraw: Bool,content: String, bookInfoID: Int) {
         self.id = id
         self.title = title
         self.linkUrl = linkUrl
@@ -53,7 +53,7 @@ extension BookChapter: Migration {
             .field("scraw_status", .bool)
             .field("content", .string)
             // This field specifies an optional constraint telling the database that the field's value references the field "id" in the "bookinfo" schema. This is also known as a foreign key and helps ensure data integrity.
-            .field("bookinfo_id", .int, .references("bookinfo", "id"))
+            .field("bookinfo_id", .int, .references("bookinfo", "book_id"))
             .create()
     }
 

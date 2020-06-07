@@ -54,6 +54,8 @@ public func configure(_ app: Application) throws {
     
     // 开机自动执行任务
     try app.queues.startInProcessJobs()
+    // 开机自动执行定时任务
+//    try app.queues.startScheduledJobs()
     
     /// 这里根据环境进行配置
     /*
