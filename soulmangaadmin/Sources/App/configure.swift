@@ -69,5 +69,9 @@ public func configure(_ app: Application) throws {
 //    app.http.server.configuration.port = 8081
     
     app.databases.default(to: .sqlite)
+    
+    // commands
+    try configCommands(app)
+    
     try app.autoMigrate().wait()
 }
