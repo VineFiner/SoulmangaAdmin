@@ -28,15 +28,20 @@ struct CrawBookInfoCommand: Command {
             .filter(\.$isScraw == false)
             .all()
         // 进行下载
-        _ = try result.flatMap { (chapters) -> EventLoopFuture<[BookChapter]> in
-            chapters.map { (chapter) in
-                let downChapter = downLoadChapter(client: context.application.client, database: context.application.db, chapter: chapter)
-                _ = downChapter.map { (chapter) in
-                    context.console.info(chapter.title)
-                }
-                return downChapter
-            }.flatten(on: context.application.db.eventLoop)
-        }.wait()
+        let chapters = try result.wait()
+        for chapter in chapters {
+            let downChapter = try downLoadChapter(client: context.application.client, database: context.application.db, chapter: chapter).wait()
+            context.console.info(downChapter.title)
+        }
+//        _ = try result.flatMap { (chapters) -> EventLoopFuture<[BookChapter]> in
+//            chapters.map { (chapter) in
+//                let downChapter = downLoadChapter(client: context.application.client, database: context.application.db, chapter: chapter)
+//                _ = downChapter.map { (chapter) in
+//                    context.console.info(chapter.title)
+//                }
+//                return downChapter
+//            }.flatten(on: context.application.db.eventLoop)
+//        }.wait()
         
     }
 

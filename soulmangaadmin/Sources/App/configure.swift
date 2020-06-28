@@ -13,6 +13,17 @@ public func configure(_ app: Application) throws {
     // Session
     app.middleware.use(app.sessions.middleware)
     app.sessions.use(.fluent)
+    
+    // Log
+    app.middleware.use(LogMiddleware(logger: app.logger))
+    // CORS
+    let corsConfiguration = CORSMiddleware.Configuration(
+        allowedOrigin: .all,
+        allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE, .PATCH],
+        allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent, .accessControlAllowOrigin]
+    )
+    let cors = CORSMiddleware(configuration: corsConfiguration)
+    app.middleware.use(cors)
     /*
      Xcode Edit Scheme -> Run -> Options -> Working Directory -> `$(SRCROOT)`
      */
